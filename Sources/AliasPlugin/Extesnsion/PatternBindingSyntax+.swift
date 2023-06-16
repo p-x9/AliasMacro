@@ -3,7 +3,7 @@
 //
 //
 //  Created by p-x9 on 2023/06/17.
-//  
+//
 //
 
 import Foundation
@@ -16,6 +16,9 @@ extension PatternBindingSyntax {
         }
         if case let .accessors(list) = accessor,
            list.accessors.contains(where: { $0.accessorKind.trimmed.text == "set" }) {
+            return true
+        }
+        if accessor == nil && initializer == nil {
             return true
         }
         return false
