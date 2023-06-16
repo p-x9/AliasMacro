@@ -31,7 +31,7 @@ class SomeClass {
 ```
 
 ### Function/Method
-You can define an alias for a function as follows.
+You can define an alias for a function as follows.  
 In this way, you can call both `hello("aaa", Date())` and `こんにちは("aaa", Date())`.
 ```swift
 class SomeClass {
