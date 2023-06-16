@@ -44,7 +44,8 @@ extension AliasMacro: PeerMacro {
         if let varDecl = declaration.as(VariableDeclSyntax.self) {
             return variableAlias(for: varDecl,
                                  with: arguments,
-                                 attribute: node)
+                                 attribute: node,
+                                 in: context)
         }
 
         if let functionDecl = declaration.as(FunctionDeclSyntax.self){
@@ -53,6 +54,7 @@ extension AliasMacro: PeerMacro {
                                  attribute: node)
         }
 
+        context.diagnose(AliasMacroDiagnostic.unsupportedDeclaration.diagnose(at: node))
         return []
     }
 }
@@ -68,10 +70,12 @@ extension AliasMacro {
 
     static func variableAlias(for varDecl: VariableDeclSyntax,
                               with arguments: Arguments,
-                              attribute: AttributeSyntax) -> [DeclSyntax] {
+                              attribute: AttributeSyntax,
+                              in context: MacroExpansionContext) -> [DeclSyntax] {
         guard let binding = varDecl.bindings.first,
               let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-              let _ = binding.typeAnnotation?.type else {
+              binding.typeAnnotation != nil else {
+            context.diagnose(AliasMacroDiagnostic.specifyTypeExplicitly.diagnose(at: varDecl))
             return []
         }
 
