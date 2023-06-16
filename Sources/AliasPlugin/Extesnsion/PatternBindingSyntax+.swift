@@ -15,7 +15,7 @@ extension PatternBindingSyntax {
             return true
         }
         if case let .accessors(list) = accessor,
-           list.accessors.contains(where: { $0.accessorKind.trimmed.text == "set" }) {
+           list.accessors.contains(where: { $0.accessorKind.tokenKind == .keyword(.set) }) {
             return true
         }
         if accessor == nil && initializer == nil {

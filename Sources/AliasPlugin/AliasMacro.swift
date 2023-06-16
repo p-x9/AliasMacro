@@ -79,14 +79,14 @@ extension AliasMacro {
             return []
         }
 
-        let isLet = varDecl.bindingKeyword.trimmed.text == "let"
+        let isLet = varDecl.bindingKeyword.tokenKind == .keyword(.let)
         let attributes = varDecl.attributes?.removed(attribute)
 
         return [
             .init(
                 varDecl
                     .with(\.attributes, attributes)
-                    .with(\.bindingKeyword, .identifier("var"))
+                    .with(\.bindingKeyword, .keyword(.var))
                     .with(\.bindings, .init {
                         binding
                             .with(\.pattern, .init(IdentifierPatternSyntax(identifier: .identifier(arguments.alias))))
@@ -113,7 +113,7 @@ extension AliasMacro {
                               with arguments: Arguments,
                               attribute: AttributeSyntax) -> [DeclSyntax] {
         let isInstanceMethod = functionDecl.isInstanceMethod
-        let baseIdentifier: TokenSyntax = isInstanceMethod ? .identifier("self") : .identifier("Self")
+        let baseIdentifier: TokenSyntax = isInstanceMethod ? .keyword(.`self`) : .keyword(.Self)
         let attributes = functionDecl.attributes?.removed(attribute)
         let newDecl = functionDecl
             .with(\.identifier, .identifier(arguments.alias))

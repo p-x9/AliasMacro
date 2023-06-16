@@ -13,7 +13,7 @@ extension VariableDeclSyntax {
     var isInstanceMethod: Bool {
         guard let modifiers else { return true }
         return !modifiers.contains(where: { modifier in
-            ["static", "class"].contains(modifier.name.trimmed.text)
+            modifier.name.tokenKind == .keyword(.class) || modifier.name.tokenKind == .keyword(.static)
         })
     }
 }
