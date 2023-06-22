@@ -31,7 +31,7 @@ class SomeClass {
 ```
 
 ### Function/Method
-You can define an alias for a function as follows.  
+You can define an alias for a function as follows.
 In this way, you can call both `hello("aaa", Date())` and `こんにちは("aaa", Date())`.
 ```swift
 class SomeClass {
@@ -50,5 +50,17 @@ Multiple aliases can be defined by adding multiple macros as follows
 var text: String = "Hello"
 ```
 
+### Specify Access Modifier of Alias
+You can specify an alias access modifier as follows.
+```swift
+@Alias("hello", access: .public)
+private var text: String = "Hello"
+```
+
+If set "inherit", it will inherit from the original definition.
+```swift
+@Alias("hello", access: .inherit)
+private var text: String = "Hello"
+```
 ## License
 AliasMacro is released under the MIT License. See [LICENSE](./LICENSE)
