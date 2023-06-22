@@ -72,6 +72,12 @@ extension AliasMacro {
                               with arguments: Arguments,
                               attribute: AttributeSyntax,
                               in context: MacroExpansionContext) -> [DeclSyntax] {
+
+        if varDecl.bindings.count > 1 {
+            context.diagnose(AliasMacroDiagnostic.multipleVariableDeclarationIsNotSupported.diagnose(at: varDecl))
+            return []
+        }
+
         guard let binding = varDecl.bindings.first,
               let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
               binding.typeAnnotation != nil else {
