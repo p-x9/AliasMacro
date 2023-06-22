@@ -26,9 +26,11 @@ let package = Package(
         .target(
             name: "Alias",
             dependencies: [
-                "AliasPlugin"
+                "AliasPlugin",
+                "AliasCore"
             ]
         ),
+        .target(name: "AliasCore"),
         .macro(
             name: "AliasPlugin",
             dependencies: [
@@ -36,7 +38,8 @@ let package = Package(
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-                .product(name: "SwiftParserDiagnostics", package: "swift-syntax")
+                .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
+                "AliasCore"
             ]
         ),
         .testTarget(
