@@ -9,10 +9,23 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import AliasCore
+
+extension AccessControl {
+    var modifier: AccessControlModifier? {
+        .init(rawValue: rawValue)
+    }
+}
 
 struct AliasMacro {
     struct Arguments {
         let alias: String
+        let accessControl: AccessControl
+
+        init(alias: String, accessControl: AccessControl?) {
+            self.alias = alias
+            self.accessControl = accessControl ?? .inherit
+        }
     }
 
     static func arguments(of node: AttributeSyntax) -> Arguments? {
@@ -21,7 +34,14 @@ struct AliasMacro {
               let name = firstElement.as(StringLiteralExprSyntax.self) else {
             return nil
         }
-        return .init(alias: name.segments.description)
+
+        var access: AccessControl?
+        if let accessExpr = arguments.lazy.compactMap({ $0.expression.as(MemberAccessExprSyntax.self) }).first {
+            let rawValue = accessExpr.name.trimmed.text.replacingOccurrences(of: "`", with: "")
+            access = AccessControl(rawValue: rawValue)
+        }
+
+        return .init(alias: name.segments.description, accessControl: access)
     }
 }
 
@@ -86,11 +106,13 @@ extension AliasMacro {
         }
 
         let attributes = varDecl.attributes?.removed(attribute)
+        let accessModifier = arguments.accessControl.modifier ?? varDecl.accessModifier
 
         return [
             .init(
                 varDecl
                     .with(\.attributes, attributes)
+                    .with(\.accessModifier, accessModifier)
                     .with(\.bindingKeyword, .keyword(.var))
                     .with(\.bindings, .init {
                         binding
