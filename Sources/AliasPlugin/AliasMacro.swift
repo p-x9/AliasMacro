@@ -72,6 +72,12 @@ extension AliasMacro {
                               with arguments: Arguments,
                               attribute: AttributeSyntax,
                               in context: MacroExpansionContext) -> [DeclSyntax] {
+
+        if varDecl.bindings.count > 1 {
+            context.diagnose(AliasMacroDiagnostic.multipleVariableDeclarationIsNotSupported.diagnose(at: varDecl))
+            return []
+        }
+
         guard let binding = varDecl.bindings.first,
               let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
               binding.typeAnnotation != nil else {
@@ -79,7 +85,6 @@ extension AliasMacro {
             return []
         }
 
-        let isLet = varDecl.bindingKeyword.tokenKind == .keyword(.let)
         let attributes = varDecl.attributes?.removed(attribute)
 
         return [
@@ -95,7 +100,7 @@ extension AliasMacro {
                                    .init(
                                     AccessorBlockSyntax(
                                         accessors: AccessorListSyntax {
-                                            if !isLet && binding.hasSetter {
+                                            if varDecl.isVar && !binding.isGetOnly {
                                                 AccessorDeclSyntax(stringLiteral: "set { \(identifier) = newValue }")
                                             }
                                             AccessorDeclSyntax(stringLiteral: "get { \(identifier) }")
@@ -112,8 +117,8 @@ extension AliasMacro {
     static func functionAlias(for functionDecl: FunctionDeclSyntax,
                               with arguments: Arguments,
                               attribute: AttributeSyntax) -> [DeclSyntax] {
-        let isInstanceMethod = functionDecl.isInstanceMethod
-        let baseIdentifier: TokenSyntax = isInstanceMethod ? .keyword(.`self`) : .keyword(.Self)
+        let isInstance = functionDecl.isInstance
+        let baseIdentifier: TokenSyntax = isInstance ? .keyword(.`self`) : .keyword(.Self)
         let attributes = functionDecl.attributes?.removed(attribute)
         let newDecl = functionDecl
             .with(\.identifier, .identifier(arguments.alias))

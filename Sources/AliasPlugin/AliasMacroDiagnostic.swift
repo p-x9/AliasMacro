@@ -12,6 +12,7 @@ import SwiftDiagnostics
 public enum AliasMacroDiagnostic {
     case unsupportedDeclaration
     case specifyTypeExplicitly
+    case multipleVariableDeclarationIsNotSupported
 }
 
 extension AliasMacroDiagnostic: DiagnosticMessage {
@@ -25,10 +26,19 @@ extension AliasMacroDiagnostic: DiagnosticMessage {
             return "Unsupported Declaration"
         case .specifyTypeExplicitly:
             return "Specify a type explicitly"
+        case .multipleVariableDeclarationIsNotSupported:
+            return """
+            Multiple variable declaration in one statement is not supported.
+            """
         }
     }
 
-    public var severity: DiagnosticSeverity { .error }
+    public var severity: DiagnosticSeverity {
+        switch self {
+        default:
+            return .error
+        }
+    }
 
     public var diagnosticID: MessageID {
         MessageID(domain: "Swift", id: "AliasMacro.\(self)")

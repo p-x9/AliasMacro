@@ -51,7 +51,7 @@ extension FunctionDeclSyntax {
 }
 
 extension FunctionDeclSyntax {
-    var isInstanceMethod: Bool {
+    var isInstance: Bool {
         guard let modifiers else { return true }
         return !modifiers.contains(where: { modifier in
             modifier.name.tokenKind == .keyword(.class) || modifier.name.tokenKind == .keyword(.static)
