@@ -39,7 +39,7 @@ final class VariableDeclSyntaxTests: XCTestCase {
             name: .init(IdentifierPatternSyntax(identifier: .identifier("value")))
         )
 
-        XCTAssertFalse(letVariable.isLet)
-        XCTAssertTrue(varVariable.isLet)
+        XCTAssertFalse(letVariable.isVar)
+        XCTAssertTrue(varVariable.isVar)
     }
 }
