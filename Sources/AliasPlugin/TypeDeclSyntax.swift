@@ -9,8 +9,9 @@
 import Foundation
 import SwiftSyntax
 
-protocol TypeDeclSyntax: DeclSyntaxProtocol {
+protocol TypeDeclSyntax: DeclSyntaxProtocol, AccessControlSyntax {
     var identifier: TokenSyntax { get set }
+    var modifiers: ModifierListSyntax? { get set }
 }
 
 extension StructDeclSyntax: TypeDeclSyntax {}
