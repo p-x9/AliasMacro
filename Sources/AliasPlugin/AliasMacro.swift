@@ -83,9 +83,18 @@ extension AliasMacro {
     static func typeAlias(for typeDecl: TypeDeclSyntax,
                           with arguments: Arguments,
                           attribute: AttributeSyntax) -> [DeclSyntax] {
-        return [
-            "typealias \(raw: arguments.alias) = \(typeDecl.identifier.trimmed)"
-        ]
+
+        let accessModifier = arguments.accessControl.modifier ?? typeDecl.accessModifier
+
+        let alias: DeclSyntax = "typealias \(raw: arguments.alias) = \(typeDecl.identifier.trimmed)"
+
+        if let accessModifier {
+            return [
+                "\(raw: accessModifier) \(alias)"
+            ]
+        }
+
+        return [alias]
     }
 
     static func variableAlias(for varDecl: VariableDeclSyntax,
@@ -141,10 +150,14 @@ extension AliasMacro {
                               attribute: AttributeSyntax) -> [DeclSyntax] {
         let isInstance = functionDecl.isInstance
         let baseIdentifier: TokenSyntax = isInstance ? .keyword(.`self`) : .keyword(.Self)
+
         let attributes = functionDecl.attributes?.removed(attribute)
+        let accessModifier = arguments.accessControl.modifier ?? functionDecl.accessModifier
+
         let newDecl = functionDecl
             .with(\.identifier, .identifier(arguments.alias))
             .with(\.attributes, attributes)
+            .with(\.accessModifier, accessModifier)
             .with(\.body, CodeBlockSyntax(statements: CodeBlockItemListSyntax {
                 functionDecl.callWithSameArguments(
                     calledExpression: MemberAccessExprSyntax(
