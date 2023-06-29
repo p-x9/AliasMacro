@@ -20,10 +20,17 @@ extension AccessControl {
 struct AliasMacro {
     struct Arguments {
         let alias: String
+        let functionArgumentLabels: [String]
         let accessControl: AccessControl
 
         init(alias: String, accessControl: AccessControl?) {
-            self.alias = alias
+            let components = alias.components(separatedBy: ":")
+            self.alias = components.first ?? alias
+            if components.count > 1 {
+                self.functionArgumentLabels = Array(components[1...])
+            } else {
+                self.functionArgumentLabels = []
+            }
             self.accessControl = accessControl ?? .inherit
         }
     }
@@ -154,10 +161,27 @@ extension AliasMacro {
         let attributes = functionDecl.attributes?.removed(attribute)
         let accessModifier = arguments.accessControl.modifier ?? functionDecl.accessModifier
 
+        let parameters: [FunctionParameterSyntax] = functionDecl.signature.input.parameterList.enumerated()
+            .map { i, param in
+                if let newLabel = arguments.functionArgumentLabels[safe: i],
+                   newLabel != "" {
+                    if param.secondName != nil {
+                        return param.with(\.firstName, .identifier(newLabel))
+                    } else {
+                        return param
+                            .with(\.firstName, .identifier(newLabel))
+                            .with(\.secondName, param.firstName)
+
+                    }
+                }
+                return param
+            }
+
         let newDecl = functionDecl
             .with(\.identifier, .identifier(arguments.alias))
             .with(\.attributes, attributes)
             .with(\.accessModifier, accessModifier)
+            .with(\.signature.input.parameterList, .init(parameters))
             .with(\.body, CodeBlockSyntax(statements: CodeBlockItemListSyntax {
                 functionDecl.callWithSameArguments(
                     calledExpression: MemberAccessExprSyntax(
