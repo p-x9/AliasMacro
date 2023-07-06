@@ -10,31 +10,31 @@ import Foundation
 import SwiftSyntax
 
 extension VariableDeclSyntax {
-    var isLet: Bool {
+    public var isLet: Bool {
         bindingKeyword.tokenKind == .keyword(.let)
     }
 
-    var isVar: Bool {
+    public var isVar: Bool {
         bindingKeyword.tokenKind == .keyword(.var)
     }
 }
 
 extension VariableDeclSyntax {
-    var isStatic: Bool {
+    public var isStatic: Bool {
         guard let modifiers else { return false }
         return modifiers.contains { modifier in
             modifier.name.tokenKind == .keyword(.static)
         }
     }
 
-    var isClass: Bool {
+    public var isClass: Bool {
         guard let modifiers else { return false }
         return modifiers.contains { modifier in
             modifier.name.tokenKind == .keyword(.class)
         }
     }
 
-    var isInstance: Bool {
+    public var isInstance: Bool {
         return !isClass && !isStatic
     }
 }

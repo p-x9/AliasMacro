@@ -9,13 +9,13 @@
 import Foundation
 
 extension Collection {
-    subscript(safe index: Index) -> Element? {
+    public subscript(safe index: Index) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
 }
 
 extension MutableCollection {
-    subscript(safe index: Index) -> Element? {
+    public subscript(safe index: Index) -> Element? {
         get {
             indices.contains(index) ? self[index] : nil
         }

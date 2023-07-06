@@ -8,9 +8,10 @@
 
 import Foundation
 import SwiftSyntax
+import SwiftSyntaxBuilder
 
 extension PatternBindingSyntax {
-    var setter: AccessorDeclSyntax? {
+    public var setter: AccessorDeclSyntax? {
         get {
             if case let .accessors(list) = accessor {
                 return list.accessors.first(where: {
@@ -57,7 +58,7 @@ extension PatternBindingSyntax {
         }
     }
 
-    var getter: AccessorDeclSyntax? {
+    public var getter: AccessorDeclSyntax? {
         get {
             switch accessor {
             case let .accessors(list):
@@ -106,7 +107,7 @@ extension PatternBindingSyntax {
         }
     }
 
-    var isGetOnly: Bool {
+    public var isGetOnly: Bool {
         if initializer != nil {
             return false
         }

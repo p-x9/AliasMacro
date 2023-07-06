@@ -10,7 +10,7 @@ import Foundation
 import SwiftSyntax
 
 extension FunctionDeclSyntax {
-    func callWithSameArguments<C>(calledExpression: C) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
+    public func callWithSameArguments<C>(calledExpression: C) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
         let params = signature.input.parameterList
 
         let arguments: [TokenSyntax] = params.map {
@@ -20,7 +20,7 @@ extension FunctionDeclSyntax {
         return call(calledExpression: calledExpression, arguments: arguments)
     }
 
-    func call<C>(calledExpression: C, arguments: [TokenSyntax]) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
+    public func call<C>(calledExpression: C, arguments: [TokenSyntax]) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
         let params = signature.input.parameterList
 
         precondition(arguments.count >= params.count)
@@ -51,7 +51,7 @@ extension FunctionDeclSyntax {
 }
 
 extension FunctionDeclSyntax {
-    var isInstance: Bool {
+    public var isInstance: Bool {
         guard let modifiers else { return true }
         return !modifiers.contains(where: { modifier in
             modifier.name.tokenKind == .keyword(.class) || modifier.name.tokenKind == .keyword(.static)
