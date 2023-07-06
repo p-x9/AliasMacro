@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftSyntax
+import AliasSupport
 
 protocol TypeDeclSyntax: DeclSyntaxProtocol, AccessControlSyntax {
     var identifier: TokenSyntax { get set }

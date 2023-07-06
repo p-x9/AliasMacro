@@ -69,7 +69,7 @@ public protocol AccessControlSyntax: DeclSyntaxProtocol {
 }
 
 extension AccessControlSyntax {
-    var accessModifier: AccessControlModifier? {
+    public var accessModifier: AccessControlModifier? {
         get {
             modifiers?.lazy
                 .map(\.name.trimmed.text)

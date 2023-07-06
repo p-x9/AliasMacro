@@ -9,7 +9,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import AliasCore
+import AliasSupport
 
 extension AccessControl {
     var modifier: AccessControlModifier? {

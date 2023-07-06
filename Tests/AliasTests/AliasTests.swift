@@ -1,6 +1,6 @@
 import XCTest
 @testable import Alias
-@testable import AliasPlugin
+@testable import AliasSupport
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
