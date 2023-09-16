@@ -65,20 +65,20 @@ extension AccessControlModifier: Comparable {
 }
 
 public protocol AccessControlSyntax: DeclSyntaxProtocol {
-    var modifiers: ModifierListSyntax? { get set }
+    var modifiers: DeclModifierListSyntax { get set }
 }
 
 extension AccessControlSyntax {
     public var accessModifier: AccessControlModifier? {
         get {
-            modifiers?.lazy
+            modifiers.lazy
                 .map(\.name.trimmed.text)
                 .compactMap { AccessControlModifier(rawValue: $0) }
                 .first
         }
         set {
-            let previous = modifiers?.lazy
-                .enumerated()
+            let previous = zip(modifiers.indices, modifiers)
+                .lazy
                 .compactMap { i, modifier in
                     if let accessModifier = AccessControlModifier(rawValue: modifier.name.trimmed.text) {
                         return (i, accessModifier)
@@ -88,16 +88,13 @@ extension AccessControlSyntax {
                 }
                 .first
 
-            var new: ModifierListSyntax? = modifiers
+            var new: DeclModifierListSyntax = modifiers
             if let previous {
-                new = new?.removing(childAt: previous.0)
+                new.remove(at: previous.0)
             }
 
             if let newValue {
-                if new == nil {
-                    new = ModifierListSyntax {}
-                }
-                new = new?.inserting(.init(name: .keyword(newValue.keyword)), at: 0)
+                new = [.init(name: .keyword(newValue.keyword))] + new
             }
 
             self.modifiers = new

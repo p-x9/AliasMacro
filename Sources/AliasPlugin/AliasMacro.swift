@@ -36,7 +36,7 @@ struct AliasMacro {
     }
 
     static func arguments(of node: AttributeSyntax) -> Arguments? {
-        guard case let .argumentList(arguments) = node.argument,
+        guard case let .argumentList(arguments) = node.arguments,
               let firstElement = arguments.first?.expression,
               let name = firstElement.as(StringLiteralExprSyntax.self) else {
             return nil
@@ -44,7 +44,7 @@ struct AliasMacro {
 
         var access: AccessControl?
         if let accessExpr = arguments.lazy.compactMap({ $0.expression.as(MemberAccessExprSyntax.self) }).first {
-            let rawValue = accessExpr.name.trimmed.text.replacingOccurrences(of: "`", with: "")
+            let rawValue = accessExpr.declName.baseName.trimmed.text.replacingOccurrences(of: "`", with: "")
             access = AccessControl(rawValue: rawValue)
         }
 
@@ -121,7 +121,7 @@ extension AliasMacro {
             return []
         }
 
-        let attributes = varDecl.attributes?.removed(attribute)
+        let attributes = varDecl.attributes.removed(attribute)
         let accessModifier = arguments.accessControl.modifier ?? varDecl.accessModifier
 
         return [
@@ -129,23 +129,21 @@ extension AliasMacro {
                 varDecl
                     .with(\.attributes, attributes)
                     .with(\.accessModifier, accessModifier)
-                    .with(\.bindingKeyword, .keyword(.var))
+                    .with(\.bindingSpecifier, .keyword(.var))
                     .with(\.bindings, .init {
                         binding
                             .with(\.pattern, .init(IdentifierPatternSyntax(identifier: .identifier(arguments.alias))))
                             .with(\.initializer, nil)
-                            .with(\.accessor,
-                                   .init(
-                                    AccessorBlockSyntax(
-                                        accessors: AccessorListSyntax {
+                            .with(\.accessorBlock, .init(accessors:
+                                    .accessors(
+                                        AccessorDeclListSyntax {
                                             if varDecl.isVar && !binding.isGetOnly {
                                                 AccessorDeclSyntax(stringLiteral: "set { \(identifier) = newValue }")
                                             }
                                             AccessorDeclSyntax(stringLiteral: "get { \(identifier) }")
                                         }
                                     )
-                                   )
-                            )
+                            ))
                     })
             )
         ]
@@ -158,10 +156,10 @@ extension AliasMacro {
         let isInstance = functionDecl.isInstance
         let baseIdentifier: TokenSyntax = isInstance ? .keyword(.`self`) : .keyword(.Self)
 
-        let attributes = functionDecl.attributes?.removed(attribute)
+        let attributes = functionDecl.attributes.removed(attribute)
         let accessModifier = arguments.accessControl.modifier ?? functionDecl.accessModifier
 
-        let parameters: [FunctionParameterSyntax] = functionDecl.signature.input.parameterList.enumerated()
+        let parameters: [FunctionParameterSyntax] = functionDecl.signature.parameterClause.parameters.enumerated()
             .map { i, param in
                 if let newLabel = arguments.functionArgumentLabels[safe: i],
                    newLabel != "" {
@@ -178,16 +176,15 @@ extension AliasMacro {
             }
 
         let newDecl = functionDecl
-            .with(\.identifier, .identifier(arguments.alias))
+            .with(\.name, .identifier(arguments.alias))
             .with(\.attributes, attributes)
             .with(\.accessModifier, accessModifier)
-            .with(\.signature.input.parameterList, .init(parameters))
+            .with(\.signature.parameterClause.parameters, .init(parameters))
             .with(\.body, CodeBlockSyntax(statements: CodeBlockItemListSyntax {
                 functionDecl.callWithSameArguments(
                     calledExpression: MemberAccessExprSyntax(
-                        base: IdentifierExprSyntax(identifier: baseIdentifier),
-                        dot: .periodToken(),
-                        name: functionDecl.identifier.trimmed
+                        base: DeclReferenceExprSyntax(baseName: baseIdentifier),
+                        name: functionDecl.name.trimmed
                     )
                 )
             }))
