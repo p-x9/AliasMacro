@@ -11,7 +11,7 @@ import SwiftSyntax
 
 extension FunctionDeclSyntax {
     public func callWithSameArguments<C>(calledExpression: C) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
-        let params = signature.input.parameterList
+        let params = signature.parameterClause.parameters
 
         let arguments: [TokenSyntax] = params.map {
             $0.secondName == nil ? $0.firstName : $0.secondName
@@ -21,20 +21,20 @@ extension FunctionDeclSyntax {
     }
 
     public func call<C>(calledExpression: C, arguments: [TokenSyntax]) -> FunctionCallExprSyntax where C: ExprSyntaxProtocol  {
-        let params = signature.input.parameterList
+        let params = signature.parameterClause.parameters
 
         precondition(arguments.count >= params.count)
 
-        var argumentList: [TupleExprElementSyntax] = params.enumerated().map { i, param in
+        var argumentList: [LabeledExprSyntax] = params.enumerated().map { i, param in
             var label: TokenSyntax? = param.firstName.trimmed
             if label?.tokenKind == .wildcard { label = nil }
 
             let expression = arguments[i]
 
-            return TupleExprElementSyntax(
+            return LabeledExprSyntax(
                 label: label,
                 colon: label == nil ? nil : .colonToken(),
-                expression: IdentifierExprSyntax(identifier: expression),
+                expression: DeclReferenceExprSyntax(baseName: expression),
                 trailingComma: .commaToken()
             )
         }
@@ -44,7 +44,7 @@ extension FunctionDeclSyntax {
         return FunctionCallExprSyntax(
             calledExpression: calledExpression,
             leftParen: .leftParenToken(),
-            argumentList: .init(argumentList),
+            arguments: .init(argumentList),
             rightParen: .rightParenToken()
         )
     }
@@ -52,7 +52,6 @@ extension FunctionDeclSyntax {
 
 extension FunctionDeclSyntax {
     public var isInstance: Bool {
-        guard let modifiers else { return true }
         return !modifiers.contains(where: { modifier in
             modifier.name.tokenKind == .keyword(.class) || modifier.name.tokenKind == .keyword(.static)
         })

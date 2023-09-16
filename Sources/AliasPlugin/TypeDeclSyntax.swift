@@ -12,7 +12,7 @@ import AliasSupport
 
 protocol TypeDeclSyntax: DeclSyntaxProtocol, AccessControlSyntax {
     var identifier: TokenSyntax { get set }
-    var modifiers: ModifierListSyntax? { get set }
+    var modifiers: DeclModifierListSyntax { get set }
 }
 
 extension StructDeclSyntax: TypeDeclSyntax {}
