@@ -50,7 +50,14 @@ let package = Package(
         ),
         .testTarget(
             name: "AliasTests",
-            dependencies: ["Alias"]
+            dependencies: [
+                "Alias",
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
+            ]
         ),
     ]
 )
