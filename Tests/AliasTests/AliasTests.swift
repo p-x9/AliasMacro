@@ -215,12 +215,12 @@ final class AliasTests: XCTestCase {
     func testDiagnosticsUnsupportedDeclaration() throws {
         assertMacroExpansion(
             """
-            @Alias("NewProtocol")
-            protocol Protocol {}
+            @Alias("NewTypeName")
+            extension String {}
             """,
             expandedSource:
             """
-            protocol Protocol {}
+            extension String {}
             """,
             diagnostics: [
                 DiagnosticSpec(
