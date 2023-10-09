@@ -112,7 +112,6 @@ final class PatternBindingSyntaxTests: XCTestCase {
         )
 
         binding.getter = newGetter
-        print(binding.description)
         XCTAssertEqual(newGetter.description, binding.getter?.description)
 
         /* getter only */
@@ -192,7 +191,6 @@ final class PatternBindingSyntaxTests: XCTestCase {
         )
 
         binding.willSet = newWillSet
-        print(binding.description)
         XCTAssertEqual(newWillSet.description, binding.willSet?.description)
     }
 
