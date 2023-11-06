@@ -11,7 +11,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 extension PatternBindingSyntax {
-    public var setter: AccessorDeclSyntax? {
+    package var setter: AccessorDeclSyntax? {
         get {
             guard let accessors = accessorBlock?.accessors,
                   case let .accessors(list) = accessors else {
@@ -28,7 +28,7 @@ extension PatternBindingSyntax {
         }
     }
 
-    public var getter: AccessorDeclSyntax? {
+    package var getter: AccessorDeclSyntax? {
         get {
             switch accessorBlock?.accessors {
             case let .accessors(list):
@@ -87,7 +87,7 @@ extension PatternBindingSyntax {
         }
     }
 
-    public var isGetOnly: Bool {
+    package var isGetOnly: Bool {
         if initializer != nil {
             return false
         }
@@ -104,7 +104,7 @@ extension PatternBindingSyntax {
 }
 
 extension PatternBindingSyntax {
-    public var willSet: AccessorDeclSyntax? {
+    package var willSet: AccessorDeclSyntax? {
         get {
             if let accessors = accessorBlock?.accessors,
                case let .accessors(list) = accessors {
@@ -120,7 +120,7 @@ extension PatternBindingSyntax {
         }
     }
 
-    public var didSet: AccessorDeclSyntax? {
+    package var didSet: AccessorDeclSyntax? {
         get {
             if let accessors = accessorBlock?.accessors,
                case let .accessors(list) = accessors {

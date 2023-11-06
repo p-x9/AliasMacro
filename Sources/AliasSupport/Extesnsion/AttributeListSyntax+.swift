@@ -10,7 +10,7 @@ import Foundation
 import SwiftSyntax
 
 extension AttributeListSyntax {
-    public func removed(_ attribute: AttributeSyntax) -> AttributeListSyntax {
+    package func removed(_ attribute: AttributeSyntax) -> AttributeListSyntax {
         let attributes = self.filter {
             if case let .attribute(item) = $0 {
                 return attribute.id == item.id
