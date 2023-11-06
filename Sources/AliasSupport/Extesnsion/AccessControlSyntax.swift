@@ -8,14 +8,14 @@
 
 import SwiftSyntax
 
-public enum AccessControlModifier: String, CaseIterable {
+package enum AccessControlModifier: String, CaseIterable {
     case `private`
     case `fileprivate`
     case `internal`
     case `public`
     case `open`
 
-    public var keyword: Keyword {
+    package var keyword: Keyword {
         switch self {
         case .private:
             return .private
@@ -30,7 +30,7 @@ public enum AccessControlModifier: String, CaseIterable {
         }
     }
 
-    public var level: Int {
+    package var level: Int {
         switch self {
         case .private:
             return 0
@@ -47,29 +47,29 @@ public enum AccessControlModifier: String, CaseIterable {
 }
 
 extension AccessControlModifier: Comparable {
-    public static func < (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
+    package static func < (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
         lhs.level < rhs.level
     }
 
-    public static func <= (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
+    package static func <= (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
         lhs.level <= rhs.level
     }
 
-    public static func >= (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
+    package static func >= (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
         lhs.level >= rhs.level
     }
 
-    public static func > (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
+    package static func > (lhs: AccessControlModifier, rhs: AccessControlModifier) -> Bool {
         lhs.level > rhs.level
     }
 }
 
-public protocol AccessControlSyntax: DeclSyntaxProtocol {
+package protocol AccessControlSyntax: DeclSyntaxProtocol {
     var modifiers: DeclModifierListSyntax { get set }
 }
 
 extension AccessControlSyntax {
-    public var accessModifier: AccessControlModifier? {
+    package var accessModifier: AccessControlModifier? {
         get {
             modifiers.lazy
                 .map(\.name.trimmed.text)
