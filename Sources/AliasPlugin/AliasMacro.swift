@@ -21,7 +21,7 @@ struct AliasMacro {
     struct Arguments {
         let alias: String
         let functionArgumentLabels: [String]
-        let accessControl: AccessControl
+        let accessControl: AccessControl?
 
         init(alias: String, accessControl: AccessControl?) {
             let components = alias.components(separatedBy: ":")
@@ -31,7 +31,7 @@ struct AliasMacro {
             } else {
                 self.functionArgumentLabels = []
             }
-            self.accessControl = accessControl ?? .inherit
+            self.accessControl = accessControl
         }
     }
 
@@ -81,6 +81,13 @@ extension AliasMacro: PeerMacro {
                                  attribute: node)
         }
 
+        if let enumCase = declaration.as(EnumCaseDeclSyntax.self) {
+            return enumCaseAlias(for: enumCase,
+                                 with: arguments,
+                                 attribute: node,
+                                 in: context)
+        }
+
         context.diagnose(AliasMacroDiagnostic.unsupportedDeclaration.diagnose(at: node))
         return []
     }
@@ -91,7 +98,7 @@ extension AliasMacro {
                           with arguments: Arguments,
                           attribute: AttributeSyntax) -> [DeclSyntax] {
 
-        let accessModifier = arguments.accessControl.modifier ?? typeDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? typeDecl.accessModifier
 
         let alias: DeclSyntax = "typealias \(raw: arguments.alias) = \(typeDecl.identifier.trimmed)"
 
@@ -122,7 +129,7 @@ extension AliasMacro {
         }
 
         let attributes = varDecl.attributes.removed(attribute)
-        let accessModifier = arguments.accessControl.modifier ?? varDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? varDecl.accessModifier
 
         return [
             .init(
@@ -157,7 +164,7 @@ extension AliasMacro {
         let baseIdentifier: TokenSyntax = isInstance ? .keyword(.`self`) : .keyword(.Self)
 
         let attributes = functionDecl.attributes.removed(attribute)
-        let accessModifier = arguments.accessControl.modifier ?? functionDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? functionDecl.accessModifier
 
         let parameters: [FunctionParameterSyntax] = functionDecl.signature.parameterClause.parameters.enumerated()
             .map { i, param in
@@ -190,6 +197,38 @@ extension AliasMacro {
             }))
         return [
             .init(newDecl)
+        ]
+    }
+
+    static func enumCaseAlias(for caseDecl: EnumCaseDeclSyntax,
+                              with arguments: Arguments,
+                              attribute: AttributeSyntax,
+                              in context: MacroExpansionContext) -> [DeclSyntax] {
+        if arguments.accessControl == .inherit {
+            context.diagnose(
+                AliasMacroDiagnostic.enumCaseCannotInheritAccessModifiers.diagnose(at: attribute)
+            )
+            return []
+        }
+        if caseDecl.elements.count > 1 {
+            context.diagnose(
+                AliasMacroDiagnostic.multipleEnumCaseDeclarationIsNotSupported.diagnose(at: caseDecl.elements)
+            )
+            return []
+        }
+        guard let element = caseDecl.elements.first else {
+            return []
+        }
+
+        let aliasDecl: DeclSyntax = "static let \(raw: arguments.alias): Self = .\(element.name)"
+
+        if let accessModifier = arguments.accessControl?.modifier {
+            return [
+                "\(raw: accessModifier) \(aliasDecl)"
+            ]
+        }
+        return [
+            aliasDecl
         ]
     }
 }

@@ -17,6 +17,6 @@ extension AttributeListSyntax {
             }
             return true
         }
-        return .init(attributes)
+        return attributes
     }
 }
