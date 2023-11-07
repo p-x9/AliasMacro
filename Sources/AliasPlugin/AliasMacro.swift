@@ -21,7 +21,7 @@ struct AliasMacro {
     struct Arguments {
         let alias: String
         let functionArgumentLabels: [String]
-        let accessControl: AccessControl
+        let accessControl: AccessControl?
 
         init(alias: String, accessControl: AccessControl?) {
             let components = alias.components(separatedBy: ":")
@@ -31,7 +31,7 @@ struct AliasMacro {
             } else {
                 self.functionArgumentLabels = []
             }
-            self.accessControl = accessControl ?? .inherit
+            self.accessControl = accessControl
         }
     }
 
@@ -81,6 +81,13 @@ extension AliasMacro: PeerMacro {
                                  attribute: node)
         }
 
+        if let enumCase = declaration.as(EnumCaseDeclSyntax.self) {
+            return enumCaseAlias(for: enumCase,
+                                 with: arguments,
+                                 attribute: node,
+                                 in: context)
+        }
+
         context.diagnose(AliasMacroDiagnostic.unsupportedDeclaration.diagnose(at: node))
         return []
     }
@@ -91,7 +98,7 @@ extension AliasMacro {
                           with arguments: Arguments,
                           attribute: AttributeSyntax) -> [DeclSyntax] {
 
-        let accessModifier = arguments.accessControl.modifier ?? typeDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? typeDecl.accessModifier
 
         let alias: DeclSyntax = "typealias \(raw: arguments.alias) = \(typeDecl.identifier.trimmed)"
 
@@ -122,7 +129,7 @@ extension AliasMacro {
         }
 
         let attributes = varDecl.attributes.removed(attribute)
-        let accessModifier = arguments.accessControl.modifier ?? varDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? varDecl.accessModifier
 
         return [
             .init(
@@ -157,7 +164,7 @@ extension AliasMacro {
         let baseIdentifier: TokenSyntax = isInstance ? .keyword(.`self`) : .keyword(.Self)
 
         let attributes = functionDecl.attributes.removed(attribute)
-        let accessModifier = arguments.accessControl.modifier ?? functionDecl.accessModifier
+        let accessModifier = arguments.accessControl?.modifier ?? functionDecl.accessModifier
 
         let parameters: [FunctionParameterSyntax] = functionDecl.signature.parameterClause.parameters.enumerated()
             .map { i, param in
@@ -191,5 +198,77 @@ extension AliasMacro {
         return [
             .init(newDecl)
         ]
+    }
+
+    static func enumCaseAlias(for caseDecl: EnumCaseDeclSyntax,
+                              with arguments: Arguments,
+                              attribute: AttributeSyntax,
+                              in context: MacroExpansionContext) -> [DeclSyntax] {
+        if arguments.accessControl == .inherit {
+            context.diagnose(
+                AliasMacroDiagnostic.enumCaseCannotInheritAccessModifiers.diagnose(at: attribute)
+            )
+            return []
+        }
+        if caseDecl.elements.count > 1 {
+            context.diagnose(
+                AliasMacroDiagnostic.multipleEnumCaseDeclarationIsNotSupported.diagnose(at: caseDecl.elements)
+            )
+            return []
+        }
+        guard let element = caseDecl.elements.first else {
+            return []
+        }
+
+        if let parameterClause = element.parameterClause {
+//            var argNames: [TokenSyntax] = []
+//            let parameters = parameterClause.parameters
+//                .enumerated()
+//                .map {
+//                    if let firstName = $1.firstName, $1.secondName == nil {
+//                        argNames.append(firstName)
+//                        return "\(firstName.trimmed): \($1.type)"
+//                    } else if let firstName = $1.firstName, let secondName = $1.secondName {
+//                        argNames.append(secondName)
+//                        return "\(firstName.trimmed) \(secondName.trimmed): \($1.type)"
+//                    } else {
+//                        argNames.append(.identifier("arg\($0)"))
+//                        return "_ arg\($0): \($1.type.trimmed)"
+//                    }
+//                }
+//                .joined(separator: ", ")
+            let parameters = parameterClause.parameters
+            let functionParameters = parameters.functionParameterListSyntax.map {
+                "\($0)"
+            }.joined(separator: ", ")
+            let functionArguments = parameters.labeledExprListSyntax.map {
+                "\($0)"
+            }.joined(separator: ", ")
+
+            let aliasDecl: DeclSyntax = """
+            static func \(raw: arguments.alias)(\(raw: functionParameters)) -> Self {
+                .\(element.name)(\(raw: functionArguments))
+            }
+            """
+            if let accessModifier = arguments.accessControl?.modifier {
+                return [
+                    "\(raw: accessModifier) \(aliasDecl)"
+                ]
+            }
+            return [
+                aliasDecl
+            ]
+        } else {
+            let aliasDecl: DeclSyntax = "static let \(raw: arguments.alias): Self = .\(element.name)"
+
+            if let accessModifier = arguments.accessControl?.modifier {
+                return [
+                    "\(raw: accessModifier) \(aliasDecl)"
+                ]
+            }
+            return [
+                aliasDecl
+            ]
+        }
     }
 }

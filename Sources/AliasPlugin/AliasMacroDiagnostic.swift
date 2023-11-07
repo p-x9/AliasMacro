@@ -13,6 +13,8 @@ public enum AliasMacroDiagnostic {
     case unsupportedDeclaration
     case specifyTypeExplicitly
     case multipleVariableDeclarationIsNotSupported
+    case enumCaseCannotInheritAccessModifiers
+    case multipleEnumCaseDeclarationIsNotSupported
 }
 
 extension AliasMacroDiagnostic: DiagnosticMessage {
@@ -29,6 +31,14 @@ extension AliasMacroDiagnostic: DiagnosticMessage {
         case .multipleVariableDeclarationIsNotSupported:
             return """
             Multiple variable declaration in one statement is not supported.
+            """
+        case .enumCaseCannotInheritAccessModifiers:
+            return """
+            Enum case has no access modifier and cannot inherit.
+            """
+        case .multipleEnumCaseDeclarationIsNotSupported:
+            return """
+            Multiple enum case declaration in one statement is not supported.
             """
         }
     }

@@ -192,6 +192,68 @@ final class AliasTests: XCTestCase {
         )
     }
 
+    func testEnumCaseAlias() throws {
+        assertMacroExpansion(
+            """
+            enum ItemType {
+                @Alias("HEAD")
+                case header
+            }
+            """,
+            expandedSource:
+            """
+            enum ItemType {
+                case header
+
+                static let HEAD: Self = .header
+            }
+            """,
+            macros: macros
+        )
+    }
+
+    func testEnumCaseAliasWithParameters() throws {
+        assertMacroExpansion(
+            """
+            enum ItemType {
+                @Alias("HEAD")
+                case header(String, subtitle: String, index: Int)
+            }
+            """,
+            expandedSource:
+            """
+            enum ItemType {
+                case header(String, subtitle: String, index: Int)
+
+                static func HEAD(_ arg0: String, subtitle: String, index: Int) -> Self {
+                    .header(arg0, subtitle: subtitle, index: index)
+                }
+            }
+            """,
+            macros: macros
+        )
+    }
+
+    func testEnumCaseAliasWithAccessModifier() throws {
+        assertMacroExpansion(
+            """
+            enum ItemType {
+                @Alias("HEAD", access: .public)
+                case header
+            }
+            """,
+            expandedSource:
+            """
+            enum ItemType {
+                case header
+
+                public static let HEAD: Self = .header
+            }
+            """,
+            macros: macros
+        )
+    }
+
     func testMultipleTypeAlias() throws {
         assertMacroExpansion(
             """
@@ -273,6 +335,60 @@ final class AliasTests: XCTestCase {
                         .message,
                     line: 1,
                     column: 1
+                )
+             ],
+             macros: macros
+        )
+    }
+
+    func testDiagnosticsEnumCaseInheritAccessModifier() throws {
+        assertMacroExpansion(
+             """
+             enum ItemType {
+                @Alias("HEAD", access: .inherit)
+                case header
+             }
+             """,
+             expandedSource:
+             """
+             enum ItemType {
+                case header
+             }
+             """,
+             diagnostics: [
+                DiagnosticSpec(
+                    message: AliasMacroDiagnostic
+                        .enumCaseCannotInheritAccessModifiers
+                        .message,
+                    line: 2,
+                    column: 4
+                )
+             ],
+             macros: macros
+        )
+    }
+
+    func testDiagnosticsMultipleEnumCase() throws {
+        assertMacroExpansion(
+             """
+             enum ItemType {
+                @Alias("HEAD", access: .public)
+                case header, footer
+             }
+             """,
+             expandedSource:
+             """
+             enum ItemType {
+                case header, footer
+             }
+             """,
+             diagnostics: [
+                DiagnosticSpec(
+                    message: AliasMacroDiagnostic
+                        .multipleEnumCaseDeclarationIsNotSupported
+                        .message,
+                    line: 3,
+                    column: 9
                 )
              ],
              macros: macros
