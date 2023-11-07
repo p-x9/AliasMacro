@@ -111,6 +111,9 @@ enum Difficulty {
 
     @Alias("extreme")
     case expert
+
+    @Alias("ultimate")
+    case master(level: Int)
 }
 ```
 
@@ -127,6 +130,10 @@ enum Difficulty {
     static let normal: Self = .medium
     static let challenge: Self = .hard
     static let extreme: Self = .expert
+
+    static func ultimate(level: Int) -> Self {
+        .master(level)
+    }
 }
 ```
 
