@@ -220,15 +220,55 @@ extension AliasMacro {
             return []
         }
 
-        let aliasDecl: DeclSyntax = "static let \(raw: arguments.alias): Self = .\(element.name)"
+        if let parameterClause = element.parameterClause {
+//            var argNames: [TokenSyntax] = []
+//            let parameters = parameterClause.parameters
+//                .enumerated()
+//                .map {
+//                    if let firstName = $1.firstName, $1.secondName == nil {
+//                        argNames.append(firstName)
+//                        return "\(firstName.trimmed): \($1.type)"
+//                    } else if let firstName = $1.firstName, let secondName = $1.secondName {
+//                        argNames.append(secondName)
+//                        return "\(firstName.trimmed) \(secondName.trimmed): \($1.type)"
+//                    } else {
+//                        argNames.append(.identifier("arg\($0)"))
+//                        return "_ arg\($0): \($1.type.trimmed)"
+//                    }
+//                }
+//                .joined(separator: ", ")
+            let parameters = parameterClause.parameters
+            let functionParameters = parameters.functionParameterListSyntax.map {
+                "\($0)"
+            }.joined(separator: ", ")
+            let functionArguments = parameters.labeledExprListSyntax.map {
+                "\($0)"
+            }.joined(separator: ", ")
 
-        if let accessModifier = arguments.accessControl?.modifier {
+            let aliasDecl: DeclSyntax = """
+            static func \(raw: arguments.alias)(\(raw: functionParameters)) -> Self {
+                .\(element.name)(\(raw: functionArguments))
+            }
+            """
+            if let accessModifier = arguments.accessControl?.modifier {
+                return [
+                    "\(raw: accessModifier) \(aliasDecl)"
+                ]
+            }
             return [
-                "\(raw: accessModifier) \(aliasDecl)"
+                aliasDecl
+            ]
+        } else {
+            let aliasDecl: DeclSyntax = "static let \(raw: arguments.alias): Self = .\(element.name)"
+
+            if let accessModifier = arguments.accessControl?.modifier {
+                return [
+                    "\(raw: accessModifier) \(aliasDecl)"
+                ]
+            }
+            return [
+                aliasDecl
             ]
         }
-        return [
-            aliasDecl
-        ]
     }
 }

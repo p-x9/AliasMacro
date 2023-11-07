@@ -212,6 +212,28 @@ final class AliasTests: XCTestCase {
         )
     }
 
+    func testEnumCaseAliasWithParameters() throws {
+        assertMacroExpansion(
+            """
+            enum ItemType {
+                @Alias("HEAD")
+                case header(String, subtitle: String, index: Int)
+            }
+            """,
+            expandedSource:
+            """
+            enum ItemType {
+                case header(String, subtitle: String, index: Int)
+
+                static func HEAD(_ arg0: String, subtitle: String, index: Int) -> Self {
+                    .header(arg0, subtitle: subtitle, index: index)
+                }
+            }
+            """,
+            macros: macros
+        )
+    }
+
     func testEnumCaseAliasWithAccessModifier() throws {
         assertMacroExpansion(
             """
