@@ -125,7 +125,7 @@ enum Difficulty {
     case medium
     case hard
     case expert
-    case master
+    case master(level: Int)
 
     static let beginner: Self = .easy
     static let normal: Self = .medium
