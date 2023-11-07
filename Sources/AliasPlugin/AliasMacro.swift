@@ -88,6 +88,12 @@ extension AliasMacro: PeerMacro {
                                  in: context)
         }
 
+        if let associatedTypeDecl = declaration.as(AssociatedTypeDeclSyntax.self) {
+            return associatedTypeDeclAlias(for: associatedTypeDecl,
+                                           with: arguments,
+                                           attribute: node)
+        }
+
         context.diagnose(AliasMacroDiagnostic.unsupportedDeclaration.diagnose(at: node))
         return []
     }
@@ -221,22 +227,6 @@ extension AliasMacro {
         }
 
         if let parameterClause = element.parameterClause {
-//            var argNames: [TokenSyntax] = []
-//            let parameters = parameterClause.parameters
-//                .enumerated()
-//                .map {
-//                    if let firstName = $1.firstName, $1.secondName == nil {
-//                        argNames.append(firstName)
-//                        return "\(firstName.trimmed): \($1.type)"
-//                    } else if let firstName = $1.firstName, let secondName = $1.secondName {
-//                        argNames.append(secondName)
-//                        return "\(firstName.trimmed) \(secondName.trimmed): \($1.type)"
-//                    } else {
-//                        argNames.append(.identifier("arg\($0)"))
-//                        return "_ arg\($0): \($1.type.trimmed)"
-//                    }
-//                }
-//                .joined(separator: ", ")
             let parameters = parameterClause.parameters
             let functionParameters = parameters.functionParameterListSyntax.map {
                 "\($0)"
@@ -268,6 +258,27 @@ extension AliasMacro {
             }
             return [
                 aliasDecl
+            ]
+        }
+    }
+
+    static func associatedTypeDeclAlias(for associatedTypeDecl: AssociatedTypeDeclSyntax,
+                                        with arguments: Arguments,
+                                        attribute: AttributeSyntax) -> [DeclSyntax] {
+
+        let accessModifier = arguments.accessControl?.modifier ?? associatedTypeDecl.accessModifier
+
+        let decl: DeclSyntax = """
+        typealias \(raw: arguments.alias) = \(associatedTypeDecl.name)
+        """
+
+        if let accessModifier {
+            return [
+                "\(raw: accessModifier) \(decl)"
+            ]
+        }else {
+            return [
+                decl
             ]
         }
     }

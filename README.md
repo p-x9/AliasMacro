@@ -138,6 +138,25 @@ enum Difficulty {
 }
 ```
 
+### associatedtype
+
+```swift
+protocol APIRequest {
+    @Alias("Reply")
+    associatedtype Response
+}
+```
+
+↓↓↓
+
+```swift
+protocol APIRequest {
+    associatedtype Response
+
+    typealias Reply = Response
+}
+```
+
 ### Class/Struct/Enum/Actor
 
 For example, the `ViewController` can also be referenced as a `VC` by writing the following.

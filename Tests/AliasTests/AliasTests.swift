@@ -254,6 +254,26 @@ final class AliasTests: XCTestCase {
         )
     }
 
+    func testAssociatedTypeAlias() throws {
+        assertMacroExpansion(
+            """
+            protocol APIRequest {
+                @Alias("Reply")
+                associatedtype Response
+            }
+            """,
+            expandedSource:
+            """
+            protocol APIRequest {
+                associatedtype Response
+
+                typealias Reply = Response
+            }
+            """,
+            macros: macros
+        )
+    }
+
     func testMultipleTypeAlias() throws {
         assertMacroExpansion(
             """
