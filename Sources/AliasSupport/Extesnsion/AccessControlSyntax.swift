@@ -111,3 +111,5 @@ extension VariableDeclSyntax: AccessControlSyntax {}
 extension FunctionDeclSyntax: AccessControlSyntax {}
 
 extension ExtensionDeclSyntax: AccessControlSyntax {}
+
+extension AssociatedTypeDeclSyntax: AccessControlSyntax {}
