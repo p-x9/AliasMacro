@@ -52,6 +52,7 @@ let package = Package(
             name: "AliasTests",
             dependencies: [
                 "Alias",
+                "AliasPlugin",
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
