@@ -48,6 +48,29 @@ final class AliasTests: XCTestCase {
         )
     }
 
+    func testVariableAliasWithLiteral() throws {
+        assertMacroExpansion(
+             """
+             @Alias("newText", access: .inherit)
+             fileprivate var string = "text"
+             """,
+             expandedSource:
+             """
+             fileprivate var string = "text"
+
+             fileprivate var newText: Swift.String {
+                 set {
+                     string  = newValue
+                 }
+                 get {
+                     string
+                 }
+             }
+             """,
+             macros: macros
+        )
+    }
+
     func testFunctionAlias() throws {
         assertMacroExpansion(
             """
@@ -342,19 +365,19 @@ final class AliasTests: XCTestCase {
         assertMacroExpansion(
              """
              @Alias("newText", access: .inherit)
-             fileprivate var string = "text"
+             fileprivate var string = String()
              """,
              expandedSource:
              """
-             fileprivate var string = "text"
+             fileprivate var string = String()
              """,
              diagnostics: [
                 DiagnosticSpec(
                     message: AliasMacroDiagnostic
                         .specifyTypeExplicitly
                         .message,
-                    line: 1,
-                    column: 1
+                    line: 2,
+                    column: 17
                 )
              ],
              macros: macros

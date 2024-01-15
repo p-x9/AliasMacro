@@ -128,9 +128,37 @@ extension AliasMacro {
         }
 
         guard let binding = varDecl.bindings.first,
-              let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-              binding.typeAnnotation != nil else {
-            context.diagnose(AliasMacroDiagnostic.specifyTypeExplicitly.diagnose(at: varDecl))
+              let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier else {
+            context.diagnose(AliasMacroDiagnostic.unsupportedDeclaration.diagnose(at: varDecl))
+            return []
+        }
+
+        var typeAnnotation: TypeAnnotationSyntax?
+        if let specifiedType = binding.typeAnnotation {
+            typeAnnotation = specifiedType
+        } else if let defaultValue = binding.initializer?.value {
+            var type: TypeSyntax?
+            switch defaultValue {
+            case _ where defaultValue.is(StringLiteralExprSyntax.self):
+                type = "Swift.String"
+            case _ where defaultValue.is(IntegerLiteralExprSyntax.self):
+                type = "Swift.Int"
+            case _ where defaultValue.is(FloatLiteralExprSyntax.self):
+                type = "Swift.Double"
+            case _ where defaultValue.is(BooleanLiteralExprSyntax.self):
+                type = "Swift.Bool"
+            default: break
+            }
+            if let type {
+                typeAnnotation = .init(
+                    type: type,
+                    trailingTrivia: .space
+                )
+            }
+        }
+
+        guard let typeAnnotation else {
+            context.diagnose(AliasMacroDiagnostic.specifyTypeExplicitly.diagnose(at: binding))
             return []
         }
 
@@ -147,6 +175,7 @@ extension AliasMacro {
                         binding
                             .with(\.pattern, .init(IdentifierPatternSyntax(identifier: .identifier(arguments.alias))))
                             .with(\.initializer, nil)
+                            .with(\.typeAnnotation, typeAnnotation)
                             .with(\.accessorBlock, .init(accessors:
                                     .accessors(
                                         AccessorDeclListSyntax {
