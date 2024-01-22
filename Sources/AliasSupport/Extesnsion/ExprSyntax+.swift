@@ -20,20 +20,19 @@ extension ExprSyntax {
             guard let arrayExpr = self.as(ArrayExprSyntax.self) else {
                 return nil
             }
-            guard let elementType = arrayExpr.detectedElementTypeByLiteral else {
-                return nil
-            }
-            return .init(ArrayTypeSyntax(element: elementType))
+            return arrayExpr.detectedTypeByLiteral
 
         case .dictionaryExpr:
             guard let dictionaryExpr = self.as(DictionaryExprSyntax.self) else {
                 return nil
             }
-            guard let keyType = dictionaryExpr.detectedKeyTypeByLiteral,
-                  let valueType = dictionaryExpr.detectedValueTypeByLiteral else {
+            return dictionaryExpr.detectedTypeByLiteral
+
+        case .tupleExpr:
+            guard let tupleExpr = self.as(TupleExprSyntax.self) else {
                 return nil
             }
-            return .init(DictionaryTypeSyntax(key: keyType, value: valueType))
+            return tupleExpr.detectedTypeByLiteral
 
         default:
             return nil
@@ -84,6 +83,15 @@ extension ArrayExprSyntax {
         let expressions = elements.map(\.expression)
         return expressions.detectedElementTypeByLiteral
     }
+
+    var detectedTypeByLiteral: TypeSyntax? {
+        guard let elementType = detectedElementTypeByLiteral else {
+            return nil
+        }
+        return .init(
+            ArrayTypeSyntax(element: elementType)
+        )
+    }
 }
 
 extension DictionaryExprSyntax {
@@ -101,5 +109,40 @@ extension DictionaryExprSyntax {
         }
         let expressions = elements.map(\.value)
         return expressions.detectedElementTypeByLiteral
+    }
+
+    var detectedTypeByLiteral: TypeSyntax? {
+        guard let keyType = detectedKeyTypeByLiteral,
+              let valueType = detectedValueTypeByLiteral else {
+            return nil
+        }
+        return .init(
+            DictionaryTypeSyntax(key: keyType, value: valueType)
+        )
+    }
+}
+
+extension TupleExprSyntax {
+    var detectedTypeByLiteral: TypeSyntax? {
+        let expressions = elements.map(\.expression)
+        let types = expressions.compactMap(\.detectedTypeByLiteral)
+        guard !expressions.isEmpty,
+              expressions.count == types.count else {
+            return nil
+        }
+        var tupleElements = types.map {
+            TupleTypeElementSyntax(
+                type: $0,
+                trailingComma: .commaToken()
+            )
+        }
+        tupleElements[tupleElements.count - 1].trailingComma = nil
+        return .init(
+            TupleTypeSyntax(
+                elements: TupleTypeElementListSyntax(
+                    tupleElements
+                )
+            )
+        )
     }
 }

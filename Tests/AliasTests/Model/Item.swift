@@ -60,4 +60,7 @@ struct Item {
 
     @Alias("optionalBoolArray_Alias")
     var optionalBoolArray = [false, nil]
+
+    @Alias("tuple_Alias")
+    var tuple = (label: "str", 1, 2.0)
 }
