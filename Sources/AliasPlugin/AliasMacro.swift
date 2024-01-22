@@ -136,25 +136,12 @@ extension AliasMacro {
         var typeAnnotation: TypeAnnotationSyntax?
         if let specifiedType = binding.typeAnnotation {
             typeAnnotation = specifiedType
-        } else if let defaultValue = binding.initializer?.value {
-            var type: TypeSyntax?
-            switch defaultValue.kind {
-            case .stringLiteralExpr:
-                type = "Swift.String"
-            case .integerLiteralExpr:
-                type = "Swift.Int"
-            case .floatLiteralExpr:
-                type = "Swift.Double"
-            case .booleanLiteralExpr:
-                type = "Swift.Bool"
-            default: break
-            }
-            if let type {
-                typeAnnotation = .init(
-                    type: type,
-                    trailingTrivia: .space
-                )
-            }
+        } else if let defaultValue = binding.initializer?.value,
+                  let detectedType = defaultValue.detectedTypeByLiteral {
+            typeAnnotation = .init(
+                type: detectedType,
+                trailingTrivia: .space
+            )
         }
 
         guard let typeAnnotation else {
