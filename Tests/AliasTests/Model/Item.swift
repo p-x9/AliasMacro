@@ -63,4 +63,17 @@ struct Item {
 
     @Alias("tuple_Alias")
     var tuple = (label: "str", 1, 2.0)
+
+    @Alias("complex_Alias")
+    var complex = [
+        "item1": [
+            (1, 2.0, "3", true),
+            (1.0, 2, "7", false),
+            (nil, nil, nil, false)
+        ],
+        "item2": [],
+        "item3": [
+            (1, 2, "3", true)
+        ]
+    ]
 }

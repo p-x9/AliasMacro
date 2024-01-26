@@ -19,8 +19,14 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git",
-                 from: "509.0.0"),
+        .package(
+            url: "https://github.com/apple/swift-syntax.git",
+            from: "509.0.0"
+        ),
+        .package(
+            url: "https://github.com/p-x9/swift-literal-type-inference.git",
+            from: "0.1.0"
+        )
     ],
     targets: [
         .target(
@@ -45,6 +51,7 @@ let package = Package(
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
+                .product(name: "LiteralTypeInference", package: "swift-literal-type-inference"),
                 "AliasSupport"
             ]
         ),
