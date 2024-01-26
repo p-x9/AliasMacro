@@ -9,6 +9,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import LiteralTypeInference
 import AliasSupport
 
 extension AccessControl {
@@ -137,9 +138,9 @@ extension AliasMacro {
         if let specifiedType = binding.typeAnnotation {
             typeAnnotation = specifiedType
         } else if let defaultValue = binding.initializer?.value,
-                  let detectedType = defaultValue.detectedTypeByLiteral {
+                  let inferredType = defaultValue.inferredType {
             typeAnnotation = .init(
-                type: detectedType,
+                type: inferredType,
                 trailingTrivia: .space
             )
         }
