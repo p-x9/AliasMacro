@@ -14,6 +14,7 @@ package enum AccessControlModifier: String, CaseIterable {
     case `internal`
     case `public`
     case `open`
+    case `package`
 
     package var keyword: Keyword {
         switch self {
@@ -27,6 +28,8 @@ package enum AccessControlModifier: String, CaseIterable {
             return .public
         case .open:
             return .open
+        case .package:
+            return .package
         }
     }
 
@@ -38,10 +41,12 @@ package enum AccessControlModifier: String, CaseIterable {
             return 1
         case .internal:
             return 2
-        case .public:
+        case .package:
             return 3
-        case .open:
+        case .public:
             return 4
+        case .open:
+            return 5
         }
     }
 }

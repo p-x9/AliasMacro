@@ -15,4 +15,5 @@ public enum AccessControl: String {
     case `internal`
     case `public`
     case `open`
+    case `package`
 }
