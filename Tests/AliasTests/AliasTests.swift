@@ -124,14 +124,14 @@ final class AliasTests: XCTestCase {
 
         assertMacroExpansion(
             """
-            @Alias("NewItem", access: .inherit)
+            @Alias("NewItem", access: .package)
             public struct Item {}
             """,
             expandedSource:
             """
             public struct Item {}
 
-            public typealias NewItem = Item
+            package typealias NewItem = Item
             """,
             macros: macros
         )
