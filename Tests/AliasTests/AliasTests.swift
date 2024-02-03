@@ -1,6 +1,8 @@
 import XCTest
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+
+#if canImport(AliasPlugin)
 @testable import AliasPlugin
 @testable import AliasSupport
 
@@ -438,3 +440,4 @@ final class AliasTests: XCTestCase {
         )
     }
 }
+#endif
